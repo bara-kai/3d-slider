@@ -1,0 +1,50 @@
+extends _layout.pug
+
+block locals
+  -var title = 'SLIDER';
+  
+block content
+  main.l-container
+    section.p-slider.p-slider--1
+      .p-slider.js-slider
+          .p-slider__inner.js-slider__inner
+            //- .p-slider__slide.c-slide.js-slide
+            //-   .c-slide__content
+            //-     .c-slide__text
+            //-       h1.c-slide__text-main Spring
+            //-     .c-slide__image-wrap
+            //-       img.c-sldie-image(src="../images/sec1_1.jpg")
+            //- .p-slider__slide.c-slide.js-slide
+            //-   .c-slide__content
+            //-     .c-slide__text
+            //-       h1.c-slide__text-main Summer
+            //-     .c-slide__image-wrap
+            //-       img.c-sldie-image(src="../images/sec1_2.jpg")
+            //- .p-slider__slide.c-slide.js-slide
+            //-   .c-slide__content
+            //-     .c-slide__text
+            //-       h1.c-slide__text-main autumn
+            //-     .c-slide__image-wrap
+            //-       img.c-sldie-image(src="../images/sec1_3.jpg")
+            //- .p-slider__slide.c-slide.js-slide
+            //-   .c-slide__content
+            //-     .c-slide__text
+            //-       h1.c-slide__text-main winter
+            //-     .c-slide__image-wrap
+            //-       img.c-sldie-image(src="../images/sec1_4.jpg")
+          nav.p-slider__bullet.c-bullet.js-bullets
+            ul.c-bullet__lists
+              li.c-bullet__item.js-bullet
+                span.c-bullet__button
+              li.c-bullet__item.js-bullet
+                span.c-bullet__button
+              li.c-bullet__item.js-bullet
+                span.c-bullet__button
+              li.c-bullet__item.js-bullet
+                span.c-bullet__button
+          nav.p-slider__pagination.c-pagination.js-paginations 
+            .c-pagination__inner 
+              .c-pagination__arrow.c-pagination__arrow--left.js-paginations-arrow-left ←
+              .c-pagination__arrow.c-pagination__arrow--right.js-paginations-arrow-right →
+          .p-slider__indicator.c-indicator.js-indicator 
+            .c-indicator__inner

@@ -1,0 +1,11 @@
+/* sp-only
+   ---------------------------------------------------------------- */
+@use '../../globals/' as *;
+
+.u-pc-only {
+  display: none;
+
+  @include mq(lg) {
+    display: block;
+  }
+}

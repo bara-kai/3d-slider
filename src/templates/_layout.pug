@@ -1,0 +1,18 @@
+doctype 
+
+block locals
+  - var title = 'boiler-plate-std'
+
+html(lang='jp')
+  head
+    meta(charaset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title #{title}
+    link(href="https://fonts.googleapis.com/css2?family=Hina+Mincho&display=swap" rel="stylesheet")
+  body
+    //- include _menu.pug
+    include _loading.pug
+    .l-global-container
+      block content
+    //- .footer footer
+      

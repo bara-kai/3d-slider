@@ -1,0 +1,9 @@
+/* container
+   ----------------------------------------------------------------- */
+
+@use '../globals/' as *;
+
+.l-container {
+  padding-bottom: 100px;
+  overflow: hidden;
+}
