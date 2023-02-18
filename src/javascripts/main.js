@@ -34,7 +34,7 @@ async function init() {
   // // 画像URL
   const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
 
-  const imageAspect = { aspWidth: 0, aspHeight: 0 };
+  // let imageAspect = { aspWidth: 0, aspHeight: 0 };
 
   // カメラ
   const camera = new THREE.OrthographicCamera(
@@ -69,7 +69,24 @@ async function init() {
 
     for (const imageUrl of imagesUrl) {
       const texture = await texLoader.loadAsync(imageUrl);
-      textures.push(texture);
+
+      texture.needsUpdate = true;
+
+      // const imageAspect = {
+      //   w: 1.0,
+      //   // h: 0.5,
+      //   h: texture.image.height / texture.image.width,
+      // };
+
+      const imageAspect = new Float32Array([
+        1.0,
+        texture.image.height / texture.image.width,
+      ]);
+
+      textures.push({
+        tex: texture,
+        asp: imageAspect,
+      });
     }
 
     return textures;
@@ -84,15 +101,37 @@ async function init() {
     $slider.offsetHeight
   );
 
+  // let uTexCurrentAsp = new Float32Array([textures[0].asp.w, textures[0].asp.h]);
+  // let uTexNextAsp = new Float32Array([textures[1].asp.w, textures[1].asp.h]);
+
+  function setAsp() {
+    uTexCurrentAsp = new Float32Array([
+      textures[imageIndex.current].asp.w,
+      textures[imageIndex.current].asp.h,
+    ]);
+    uTexNextAsp = new Float32Array([
+      textures[imageIndex.next].asp.w,
+      textures[imageIndex.next].asp.h,
+    ]);
+  }
+
+  // material.uniforms.uTexCurrentAsp.value = uTexCurrentAsp;
+  // material.uniforms.uTexNextAsp.value = uTexNextAsp;
+
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uTexCurrent: { value: textures[0] },
-      uTexNext: { value: textures[1] },
+      uTexCurrent: { value: textures[0].tex },
+      uTexNext: { value: textures[1].tex },
+      // uTexCurrentAsp: { value: uTexCurrentAsp },
+      // uTexNextAsp: { value: uTexNextAsp },
+      uTexCurrentAsp: { value: textures[0].asp },
+      uTexNextAsp: { value: textures[1].asp },
       uTick: { value: 0 },
       uProgress: { value: 0 },
     },
     vertexShader: vert,
     fragmentShader: frag,
+    // wireframe: true,
   });
 
   const mesh = new THREE.Mesh(geometry, material);
@@ -131,7 +170,7 @@ async function init() {
   }
 
   // スライドディレイ、アニメーションステート、タイマー
-  const slideDelayTime = 3000;
+  const slideDelayTime = 1000;
   let animationState = false;
   let timer;
 
@@ -140,22 +179,39 @@ async function init() {
     if (!animationState) {
       animationState = true;
       clearTimeout(timer);
+      // console.log('cA before: ' + uTexCurrentAsp);
+      // setAsp();
+      // console.log('↓uTexCurrentAsp');
+      // console.log('uA after : ' + uTexCurrentAsp);
+      // console.log('↓uTexNextAsp');
+      // console.log(uTexNextAsp);
 
-      material.uniforms.uTexCurrent.value = textures[imageIndex.current];
-      material.uniforms.uTexNext.value = textures[imageIndex.next];
+      // uTexCurrentAsp = new Float32Array([
+      //   textures[imageIndex.current].asp.w,
+      //   textures[imageIndex.current].asp.h,
+      // ]);
+      // uTexNextAsp = new Float32Array([
+      //   textures[imageIndex.next].asp.w,
+      //   textures[imageIndex.next].asp.h,
+      // ]);
+
+      material.uniforms.uTexCurrentAsp.value = textures[imageIndex.current].asp;
+      material.uniforms.uTexNextAsp.value = textures[imageIndex.next].asp;
+      console.log(imageIndex);
+      material.uniforms.uTexCurrent.value = textures[imageIndex.current].tex;
+      material.uniforms.uTexNext.value = textures[imageIndex.next].tex;
       gsap.to(material.uniforms.uProgress, {
-        duration: 0.5,
+        duration: 3.5,
         value: 1,
         ease: 'Expo.easeInoOut',
         onComplete: () => {
-          material.uniforms.uTexCurrent.value = textures[imageIndex.next];
           material.uniforms.uProgress.value = 0;
-          imageIndex.current = imageIndex.next;
-          animationState = false;
+          // imageIndex.current = imageIndex.next;
+          // animationState = false;
 
           timer = setTimeout(() => {
-            nextImage();
-            slideAnimation();
+            // nextImage();
+            // slideAnimation();
           }, slideDelayTime);
         },
       });
