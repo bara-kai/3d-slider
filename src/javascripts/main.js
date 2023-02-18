@@ -61,6 +61,19 @@ async function init() {
 
   $inner.appendChild(renderer.domElement);
 
+  //ブラウザのリサイズ操作
+  window.addEventListener('resize', () => {
+    // sizes.width = $slider.offsetWidth;
+    // sizes.height = $slider.offsetHeight;
+
+    console.log('call resize');
+    camera.aspect = $slider.offsetWidth / $slider.offsetHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+  });
+
   // テクスチャのロード
   async function loadTex(url) {
     const texLoader = new THREE.TextureLoader();
@@ -96,27 +109,7 @@ async function init() {
   const textures = await loadTex();
 
   // ジオメトリ
-  const geometry = new THREE.PlaneGeometry(
-    $slider.offsetWidth,
-    $slider.offsetHeight
-  );
-
-  // let uTexCurrentAsp = new Float32Array([textures[0].asp.w, textures[0].asp.h]);
-  // let uTexNextAsp = new Float32Array([textures[1].asp.w, textures[1].asp.h]);
-
-  function setAsp() {
-    uTexCurrentAsp = new Float32Array([
-      textures[imageIndex.current].asp.w,
-      textures[imageIndex.current].asp.h,
-    ]);
-    uTexNextAsp = new Float32Array([
-      textures[imageIndex.next].asp.w,
-      textures[imageIndex.next].asp.h,
-    ]);
-  }
-
-  // material.uniforms.uTexCurrentAsp.value = uTexCurrentAsp;
-  // material.uniforms.uTexNextAsp.value = uTexNextAsp;
+  const geometry = new THREE.PlaneGeometry(700, 700);
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
@@ -170,7 +163,7 @@ async function init() {
   }
 
   // スライドディレイ、アニメーションステート、タイマー
-  const slideDelayTime = 1000;
+  const slideDelayTime = 3000;
   let animationState = false;
   let timer;
 
@@ -179,39 +172,26 @@ async function init() {
     if (!animationState) {
       animationState = true;
       clearTimeout(timer);
-      // console.log('cA before: ' + uTexCurrentAsp);
-      // setAsp();
-      // console.log('↓uTexCurrentAsp');
-      // console.log('uA after : ' + uTexCurrentAsp);
-      // console.log('↓uTexNextAsp');
-      // console.log(uTexNextAsp);
-
-      // uTexCurrentAsp = new Float32Array([
-      //   textures[imageIndex.current].asp.w,
-      //   textures[imageIndex.current].asp.h,
-      // ]);
-      // uTexNextAsp = new Float32Array([
-      //   textures[imageIndex.next].asp.w,
-      //   textures[imageIndex.next].asp.h,
-      // ]);
 
       material.uniforms.uTexCurrentAsp.value = textures[imageIndex.current].asp;
       material.uniforms.uTexNextAsp.value = textures[imageIndex.next].asp;
-      console.log(imageIndex);
       material.uniforms.uTexCurrent.value = textures[imageIndex.current].tex;
       material.uniforms.uTexNext.value = textures[imageIndex.next].tex;
       gsap.to(material.uniforms.uProgress, {
-        duration: 3.5,
+        duration: 0.5,
         value: 1,
         ease: 'Expo.easeInoOut',
         onComplete: () => {
+          material.uniforms.uTexCurrent.value = textures[imageIndex.next].tex;
+          material.uniforms.uTexCurrentAsp.value =
+            textures[imageIndex.next].asp;
           material.uniforms.uProgress.value = 0;
-          // imageIndex.current = imageIndex.next;
-          // animationState = false;
+          imageIndex.current = imageIndex.next;
+          animationState = false;
 
           timer = setTimeout(() => {
-            // nextImage();
-            // slideAnimation();
+            nextImage();
+            slideAnimation();
           }, slideDelayTime);
         },
       });
