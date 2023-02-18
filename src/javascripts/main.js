@@ -28,16 +28,13 @@ async function init() {
 
   // // バレット、ページネーション、インジケーター
   const $bullets = document.querySelector('.js-bullets'),
-    $paginations = document.querySelector('.js-paginations '),
     $indicator = document.querySelector('.js-indicator');
 
-  const $bulletsArray = [...$bullets.querySelectorAll('.js-bullet')],
-    $paginationsLeft = $paginations.querySelector('.js-paginations-arrow-left'),
-    $paginationsRight = $paginations.querySelector(
-      '.js-paginations-arrow-right'
-    );
+  const $bulletsArray = [...$bullets.querySelectorAll('.js-bullet')];
   // // 画像URL
   const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
+
+  const imageAspect = { aspWidth: 0, aspHeight: 0 };
 
   // カメラ
   const camera = new THREE.OrthographicCamera(
@@ -133,27 +130,30 @@ async function init() {
     }
   }
 
-  // スライドディレイ、アニメーションステート
+  // スライドディレイ、アニメーションステート、タイマー
   const slideDelayTime = 3000;
   let animationState = false;
+  let timer;
 
   // スライドアニメーション
   function slideAnimation() {
     if (!animationState) {
       animationState = true;
+      clearTimeout(timer);
 
       material.uniforms.uTexCurrent.value = textures[imageIndex.current];
       material.uniforms.uTexNext.value = textures[imageIndex.next];
       gsap.to(material.uniforms.uProgress, {
-        duration: 1.0,
+        duration: 0.5,
         value: 1,
         ease: 'Expo.easeInoOut',
         onComplete: () => {
-          console.log(imageIndex);
           material.uniforms.uTexCurrent.value = textures[imageIndex.next];
           material.uniforms.uProgress.value = 0;
+          imageIndex.current = imageIndex.next;
           animationState = false;
-          setTimeout(() => {
+
+          timer = setTimeout(() => {
             nextImage();
             slideAnimation();
           }, slideDelayTime);
@@ -164,53 +164,22 @@ async function init() {
 
   // ファーストアニメーション
   const fristAnimation = () => {
-    setTimeout(() => {
+    timer = setTimeout(() => {
       slideAnimation();
     }, slideDelayTime);
   };
   fristAnimation();
 
-  const arrows = [];
-  arrows.push($paginationsLeft);
-  arrows.push($paginationsRight);
-
-  arrows.forEach((arrow) => {
-    arrow.addEventListener('click', () => {
-      // slideAnimation();
-    });
-  });
-
-  function bulletAnimation() {
-    if (!animationState) {
-      animationState = true;
-
-      material.uniforms.uTexCurrent.value = textures[imageIndex.current];
-      material.uniforms.uTexNext.value = textures[imageIndex.next];
-      gsap.to(material.uniforms.uProgress, {
-        duration: 1.0,
-        value: 1,
-        ease: 'Expo.easeInoOut',
-        onComplete: () => {
-          console.log(imageIndex);
-          material.uniforms.uTexCurrent.value = textures[imageIndex.next];
-          material.uniforms.uProgress.value = 0;
-          animationState = false;
-          setTimeout(() => {
-            nextImage();
-            slideAnimation();
-          }, slideDelayTime);
-        },
-      });
-    }
-  }
-
-  console.log(imageIndex);
   $bulletsArray.forEach((bullet) => {
     bullet.addEventListener('click', () => {
       let bulletIndex = parseInt(bullet.dataset.slide, 10);
-      imageIndex.next = bulletIndex;
-      console.log(imageIndex);
-      bulletAnimation();
+
+      clearTimeout(timer);
+      timer = setTimeout(slideAnimation, slideDelayTime);
+      if (bulletIndex !== imageIndex.current) {
+        imageIndex.next = bulletIndex;
+        slideAnimation();
+      }
     });
   });
 }
