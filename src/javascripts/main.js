@@ -13,11 +13,10 @@ import imageurl4 from '../images/sec1_4.jpg';
 
 // style
 import '../stylesheets/style.scss';
-import { first } from 'lodash';
 
-init();
+slider1();
 
-async function init() {
+async function slider1() {
   const vert = vertexShader,
     frag = fragmentShader;
 
@@ -34,7 +33,14 @@ async function init() {
   // // 画像URL
   const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
 
-  // let imageAspect = { aspWidth: 0, aspHeight: 0 };
+  //  画面幅がSLIDE_WIDTHに指定した値以上の場合 meshが拡大表示される
+  const SLIDE_WIDTH = 1000;
+  // 画面幅がSLIDE_WIDTH以下の場合 余白ができるので高さを指定する
+  const SLIDE_MAXHEIGHT = 650;
+  // スライドの画像サイズとジオメトリのサイズの調整
+  const GEO_ADJ = 0.68;
+
+  $slider.style.maxHeight = `${SLIDE_MAXHEIGHT}px`;
 
   // カメラ
   const camera = new THREE.OrthographicCamera(
@@ -63,11 +69,14 @@ async function init() {
 
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
-    // sizes.width = $slider.offsetWidth;
-    // sizes.height = $slider.offsetHeight;
+    camera.left = -$slider.offsetWidth / 2;
+    camera.right = $slider.offsetWidth / 2;
+    camera.top = $slider.offsetHeight / 2;
+    camera.bottom = -$slider.offsetHeight / 2;
 
-    console.log('call resize');
-    camera.aspect = $slider.offsetWidth / $slider.offsetHeight;
+    if ($slider.offsetWidth > SLIDE_WIDTH) {
+      material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+    }
     camera.updateProjectionMatrix();
 
     renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
@@ -84,12 +93,6 @@ async function init() {
       const texture = await texLoader.loadAsync(imageUrl);
 
       texture.needsUpdate = true;
-
-      // const imageAspect = {
-      //   w: 1.0,
-      //   // h: 0.5,
-      //   h: texture.image.height / texture.image.width,
-      // };
 
       const imageAspect = new Float32Array([
         1.0,
@@ -109,39 +112,39 @@ async function init() {
   const textures = await loadTex();
 
   // ジオメトリ
-  const geometry = new THREE.PlaneGeometry(700, 700);
+  // shaderよりアスペクト比を指定しているため、w,hは共通の値を入れておく
+  const geoSize = {
+    w: SLIDE_WIDTH * GEO_ADJ,
+    h: SLIDE_WIDTH * GEO_ADJ,
+  };
+
+  const geometry = new THREE.PlaneGeometry(geoSize.w, geoSize.h);
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTexCurrent: { value: textures[0].tex },
       uTexNext: { value: textures[1].tex },
-      // uTexCurrentAsp: { value: uTexCurrentAsp },
-      // uTexNextAsp: { value: uTexNextAsp },
       uTexCurrentAsp: { value: textures[0].asp },
       uTexNextAsp: { value: textures[1].asp },
       uTick: { value: 0 },
       uProgress: { value: 0 },
+      uTexScale: { value: 1.0 },
     },
     vertexShader: vert,
     fragmentShader: frag,
-    // wireframe: true,
   });
+  if ($slider.offsetWidth > SLIDE_WIDTH) {
+    material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+  }
 
   const mesh = new THREE.Mesh(geometry, material);
+
   scene.add(mesh);
-
-  // dat gui
-  // const gui = new GUI();
-  // const folder1 = gui.addFolder('progress');
-  // folder1.open();
-
-  // folder1.add(material.uniforms.uProgress, 'value', 0, 1, 0.1).name('progess');
 
   let i = 0;
   function animate() {
     requestAnimationFrame(animate);
 
-    // material.uniforms.uTick.value++;
     renderer.render(scene, camera);
   }
 
@@ -218,4 +221,11 @@ async function init() {
       }
     });
   });
+
+  // dat gui
+  // const gui = new GUI();
+  // const folder1 = gui.addFolder('uniforms');
+  // folder1.open();
+
+  // folder1.add(material.uniforms.uTexScale, 'value', 0, 2.0, 0.1).name('Scale');
 }
