@@ -11,10 +11,15 @@ import imageurl2 from '../images/sec1_2.jpg';
 import imageurl3 from '../images/sec1_3.jpg';
 import imageurl4 from '../images/sec1_4.jpg';
 
+import slider2 from './modules/slider2.js';
+import slider3 from './modules/slider3.js';
+
 // style
 import '../stylesheets/style.scss';
 
 slider1();
+slider2();
+slider3();
 
 async function slider1() {
   const vert = vertexShader,
@@ -26,19 +31,19 @@ async function slider1() {
     $slides = [...$slider.querySelectorAll('.js-slide')];
 
   // // バレット、ページネーション、インジケーター
-  const $bullets = document.querySelector('.js-bullets'),
-    $indicator = document.querySelector('.js-indicator');
+  const $bullets = $slider.querySelector('.js-bullets'),
+    $indicator = $slider.querySelector('.js-indicator');
 
   const $bulletsArray = [...$bullets.querySelectorAll('.js-bullet')];
   // // 画像URL
   const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
 
   //  画面幅がSLIDE_WIDTHに指定した値以上の場合 meshが拡大表示される
-  const SLIDE_WIDTH = 1000;
+  const SLIDE_WIDTH = 500;
   // 画面幅がSLIDE_WIDTH以下の場合 余白ができるので高さを指定する
   const SLIDE_MAXHEIGHT = 650;
   // スライドの画像サイズとジオメトリのサイズの調整
-  const GEO_ADJ = 0.68;
+  const GEO_ADJ = 0.8;
 
   $slider.style.maxHeight = `${SLIDE_MAXHEIGHT}px`;
 

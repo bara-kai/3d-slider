@@ -3,77 +3,237 @@ import { Mesh, PlaneGeometry } from 'three';
 import GUI from 'lil-gui';
 import { gsap } from 'gsap';
 
-import vertexShader from './shader/vertex.glsl';
-import fragmentShader from './shader/fragment.glsl';
+import vertexShader from '../shader/slider2vert.glsl';
+import fragmentShader from '../shader/slider2frag.glsl';
 
-import imageurl1 from '../images/sec1_1.jpg';
-import imageurl2 from '../images/sec1_2.jpg';
-import imageurl3 from '../images/sec1_3.jpg';
-import imageurl4 from '../images/sec1_4.jpg';
+// 画像
+import imageurl1 from '../../images/sec2_1.jpg';
+import imageurl2 from '../../images/sec2_2.jpg';
+import imageurl3 from '../../images/sec2_3.jpg';
+import imageurl4 from '../../images/sec2_4.jpg';
+// ノイズ
+import disp from '../../images/disp/7.jpg';
 
-class Slider {
-  constructor() {
-    this.vert = vertexShader;
-    this.frag = fragmentShader;
-    this.$slider = document.querySelector('.js-slider');
-    this.$inner = this.$slider.querySelector('.js-slider__inner');
-    this.$slides = [...this.$slider.querySelectorAll('.js-slide')];
-    this.$bullets = document.querySelector('.js-bullets');
-    this.$indicator = document.querySelector('.js-indicator');
-    this.$bulletsArray = [...this.$bullets.querySelectorAll('.js-bullet')];
-    this.imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
-    this.SLIDE_WIDTH = 1000;
-    this.SLIDE_MAXHEIGHT = 650;
-    this.GEO_ADJ = 0.68;
+async function slider2() {
+  const vert = vertexShader,
+    frag = fragmentShader;
 
-    this.camera = new THREE.OrthographicCamera(
-      this.$slider.offsetWidth / -2,
-      this.$slider.offsetWidth / 2,
-      this.$slider.offsetHeight / 2,
-      this.$slider.offsetHeight / -2,
-      1,
-      1000
-    );
+  // DOM
+  const $slider = document.querySelector('.js-slider2'),
+    $inner = $slider.querySelector('.js-slider__inner'),
+    $slides = [...$slider.querySelectorAll('.js-slide')];
 
-    this.camera.position.z = 100;
-    this.scene = new THREE.Scene();
-    this.clock = new THREE.Clock();
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.$slider.offsetWidth, this.$slider.offsetHeight);
-    this.$inner.appendChild(this.renderer.domElement);
-    this.$slider.style.maxHeight = `${this.SLIDE_MAXHEIGHT}px`;
-    this.geometry = new THREE.PlaneGeometry(this.SLIDE_WIDTH * this.GEO_ADJ, this.SLIDE_WIDTH * this.GEO_ADJ);
-    this.material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTexCurrent: { value: null },
-        uTexNext: { value: null },
-        uTexCurrentAsp: { value: null },
-        uTexNextAsp: { value: null },
-        uTick: { value: 0 },
-        uProgress: { value: 0 },
-        uTexScale: { value: 1.0 },
-      },
-      vertexShader: this.vert,
-      fragmentShader: this.frag,
-    });
+  // // バレット、ページネーション、インジケーター
+  const $bullets = $slider.querySelector('.js-bullets'),
+    $indicator = $slider.querySelector('.js-indicator');
 
-    if (this.$slider.offsetWidth > this.SLIDE_WIDTH) {
-      this.material.uniforms.uTexScale.value = this.$slider.offsetWidth / this.SLIDE_WIDTH;
+  const $bulletsArray = [...$bullets.querySelectorAll('.js-bullet')];
+  // // 画像URL
+  const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
+
+  //  画面幅がSLIDE_WIDTHに指定した値以上の場合 meshが拡大表示される
+  const SLIDE_WIDTH = 1000;
+  // 画面幅がSLIDE_WIDTH以下の場合 余白ができるので高さを指定する
+  const SLIDE_MAXHEIGHT = 650;
+  // スライドの画像サイズとジオメトリのサイズの調整
+  const GEO_ADJ = 0.68;
+
+  $slider.style.maxHeight = `${SLIDE_MAXHEIGHT}px`;
+
+  // カメラ
+  const camera = new THREE.OrthographicCamera(
+    $slider.offsetWidth / -2,
+    $slider.offsetWidth / 2,
+    $slider.offsetHeight / 2,
+    $slider.offsetHeight / -2,
+    1,
+    1000
+  );
+
+  camera.position.z = 100;
+
+  // シーン
+  const scene = new THREE.Scene();
+
+  // クロック
+  const clock = new THREE.Clock();
+
+  // レンダー
+  const renderer = new THREE.WebGLRenderer();
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
+
+  $inner.appendChild(renderer.domElement);
+
+  //ブラウザのリサイズ操作
+  window.addEventListener('resize', () => {
+    camera.left = -$slider.offsetWidth / 2;
+    camera.right = $slider.offsetWidth / 2;
+    camera.top = $slider.offsetHeight / 2;
+    camera.bottom = -$slider.offsetHeight / 2;
+
+    if ($slider.offsetWidth > SLIDE_WIDTH) {
+      material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+    }
+    camera.updateProjectionMatrix();
+
+    renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+  });
+
+  // テクスチャのロード
+  async function loadTex(url) {
+    const texLoader = new THREE.TextureLoader();
+
+    const textures = [];
+
+    for (const imageUrl of imagesUrl) {
+      const texture = await texLoader.loadAsync(imageUrl);
+
+      texture.needsUpdate = true;
+
+      const imageAspect = new Float32Array([
+        1.0,
+        texture.image.height / texture.image.width,
+      ]);
+
+      textures.push({
+        tex: texture,
+        asp: imageAspect,
+      });
     }
 
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.mesh);
-    this.imageIndex = { current: 0, next: 1 };
-    this.textures = [];
-    this.imagelength = this.imagesUrl.length;
-    this.isAnimating = false;
+    return textures;
+  }
 
-    window.addEventListener('resize', () => {
-      this.camera.left = -this.$slider.offsetWidth / 2;
-      this.camera.right = this.$slider.offsetWidth / 2;
-      this.camera.top = this.$slider.offsetHeight / 2;
-      this.camera.bottom = -this.$slider.offsetHeight / 2;
+  // テクスチャの配列
+  const textures = await loadTex();
 
-      if (this.$slider.offsetWidth > this.SLIDE_WIDTH) {
-        this.material.uniforms.u
+  // disp ノイズ
+  async function loader(url) {
+    const texLoader = new THREE.TextureLoader();
+    const texture = await texLoader.loadAsync(url);
+    return texture;
+  }
+
+  // ジオメトリ
+  // shaderよりアスペクト比を指定しているため、w,hは共通の値を入れておく
+  const geoSize = {
+    w: SLIDE_WIDTH * GEO_ADJ,
+    h: SLIDE_WIDTH * GEO_ADJ,
+  };
+
+  const geometry = new THREE.PlaneGeometry(geoSize.w, geoSize.h);
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTexCurrent: { value: textures[0].tex },
+      uTexNext: { value: textures[1].tex },
+      uTexCurrentAsp: { value: textures[0].asp },
+      uTexNextAsp: { value: textures[1].asp },
+      uTexDisp: { value: await loader(disp) },
+      uTick: { value: 0 },
+      uProgress: { value: 0 },
+      uTexScale: { value: 1.0 },
+    },
+    vertexShader: vert,
+    fragmentShader: frag,
+  });
+  if ($slider.offsetWidth > SLIDE_WIDTH) {
+    material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+  }
+
+  const mesh = new THREE.Mesh(geometry, material);
+
+  scene.add(mesh);
+
+  let i = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // スライドのセット
+  let imageIndex = { current: 0, next: 1 };
+  const imagelength = imagesUrl.length;
+
+  // カレント、ネクストイメージのindexセット
+  function nextImage() {
+    if (imageIndex.next < imagelength - 1) {
+      imageIndex.current = imageIndex.next;
+      imageIndex.next = imageIndex.next + 1;
+    } else {
+      imageIndex.current = imageIndex.next;
+      imageIndex.next = 0;
+    }
+  }
+
+  // スライドディレイ、アニメーションステート、タイマー
+  const slideDelayTime = 3000;
+  let animationState = false;
+  let timer;
+
+  // スライドアニメーション
+  function slideAnimation() {
+    if (!animationState) {
+      animationState = true;
+      clearTimeout(timer);
+
+      material.uniforms.uTexCurrentAsp.value = textures[imageIndex.current].asp;
+      material.uniforms.uTexNextAsp.value = textures[imageIndex.next].asp;
+      material.uniforms.uTexCurrent.value = textures[imageIndex.current].tex;
+      material.uniforms.uTexNext.value = textures[imageIndex.next].tex;
+      gsap.to(material.uniforms.uProgress, {
+        duration: 1.5,
+        value: 1,
+        ease: 'Expo.easeInoOut',
+        onComplete: () => {
+          material.uniforms.uTexCurrent.value = textures[imageIndex.next].tex;
+          material.uniforms.uTexCurrentAsp.value =
+            textures[imageIndex.next].asp;
+          material.uniforms.uProgress.value = 0;
+          imageIndex.current = imageIndex.next;
+          animationState = false;
+
+          timer = setTimeout(() => {
+            nextImage();
+            slideAnimation();
+          }, slideDelayTime);
+        },
+      });
+    }
+  }
+
+  // ファーストアニメーション
+  const fristAnimation = () => {
+    timer = setTimeout(() => {
+      slideAnimation();
+    }, slideDelayTime);
+  };
+  fristAnimation();
+
+  $bulletsArray.forEach((bullet) => {
+    bullet.addEventListener('click', () => {
+      let bulletIndex = parseInt(bullet.dataset.slide, 10);
+
+      clearTimeout(timer);
+      timer = setTimeout(slideAnimation, slideDelayTime);
+      if (bulletIndex !== imageIndex.current) {
+        imageIndex.next = bulletIndex;
+        slideAnimation();
+      }
+    });
+  });
+
+  // dat gui
+  // const gui = new GUI();
+  // const folder1 = gui.addFolder('uniforms');
+  // folder1.open();
+
+  // folder1.add(material.uniforms.uTexScale, 'value', 0, 2.0, 0.1).name('Scale');
+}
+
+export default slider2;
