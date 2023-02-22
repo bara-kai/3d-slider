@@ -17,9 +17,11 @@ import slider3 from './modules/slider3.js';
 // style
 import '../stylesheets/style.scss';
 
-slider1();
-slider2();
-slider3();
+document.addEventListener('DOMContentLoaded', () => {
+  slider1();
+  slider2();
+  slider3();
+});
 
 async function slider1() {
   const vert = vertexShader,
