@@ -64,6 +64,8 @@ async function slider2() {
   renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
 
   $inner.appendChild(renderer.domElement);
+  // canvasの高さを指定
+  $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}px`;
 
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {

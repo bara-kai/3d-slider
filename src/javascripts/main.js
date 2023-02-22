@@ -39,11 +39,10 @@ async function slider1() {
   const imagesUrl = [imageurl1, imageurl2, imageurl3, imageurl4];
 
   //  画面幅がSLIDE_WIDTHに指定した値以上の場合 meshが拡大表示される
-  const SLIDE_WIDTH = 500;
+  const SLIDE_WIDTH = 860;
   // 画面幅がSLIDE_WIDTH以下の場合 余白ができるので高さを指定する
-  const SLIDE_MAXHEIGHT = 650;
-  // スライドの画像サイズとジオメトリのサイズの調整
-  const GEO_ADJ = 0.8;
+  const SLIDE_MAXHEIGHT = 580;
+  const GEO_ADJ = 0.7;
 
   $slider.style.maxHeight = `${SLIDE_MAXHEIGHT}px`;
 
@@ -71,7 +70,7 @@ async function slider1() {
   renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
 
   $inner.appendChild(renderer.domElement);
-  console.log($inner.querySelector('canvas'));
+  // canvasの高さを指定
   $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}px`;
 
   //ブラウザのリサイズ操作

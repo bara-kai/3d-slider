@@ -64,6 +64,8 @@ async function slider3() {
   renderer.setClearColor(0xffffff);
 
   $inner.appendChild(renderer.domElement);
+  // canvasの高さを指定
+  $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}vh`;
 
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
