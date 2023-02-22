@@ -12,7 +12,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'javascripts/[name]-[contenthash].js',
-    publicPath: '/',
+    publicPath: './',
   },
   devServer: {
     contentBase: path.join(__dirname, '.dist'),
