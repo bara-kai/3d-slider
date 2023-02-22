@@ -67,6 +67,23 @@ async function slider3() {
   // canvasの高さを指定
   $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}vh`;
 
+  // first
+  const fristEvent = () => {
+    console.log('firstEvent');
+    camera.left = -$slider.offsetWidth / 2;
+    camera.right = $slider.offsetWidth / 2;
+    camera.top = $slider.offsetHeight / 2;
+    camera.bottom = -$slider.offsetHeight / 2;
+
+    if ($slider.offsetWidth > SLIDE_WIDTH) {
+      material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+    }
+    camera.updateProjectionMatrix();
+
+    renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+  };
+
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
     camera.left = -$slider.offsetWidth / 2;
@@ -303,6 +320,9 @@ async function slider3() {
   // folder1
   //   .add(material.uniforms.uProgress, 'value', 0, 1.0, 0.1)
   //   .name('Progaress');
+  return {
+    fristEvent,
+  };
 }
 
 export default slider3;

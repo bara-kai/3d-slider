@@ -20,14 +20,18 @@ import '../stylesheets/style.scss';
 window.addEventListener('load', () => {
   // slider1();
   async function callSlider() {
-    const slider = await slider1();
-    slider.fristEvent();
+    const Slider1 = await slider1();
+    const Slider2 = await slider2();
+    const Slider3 = await slider3();
+    Slider1.fristEvent();
+    Slider2.fristEvent();
+    Slider3.fristEvent();
   }
 
   callSlider();
 
-  slider2();
-  slider3();
+  // slider2();
+  // slider3();
 });
 
 async function slider1() {
