@@ -18,8 +18,8 @@ import slider3 from './modules/slider3.js';
 import '../stylesheets/style.scss';
 
 slider1();
-// slider2();
-// slider3();
+slider2();
+slider3();
 
 async function slider1() {
   const vert = vertexShader,
@@ -71,6 +71,8 @@ async function slider1() {
   renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
 
   $inner.appendChild(renderer.domElement);
+  console.log($inner.querySelector('canvas'));
+  $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}px`;
 
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
