@@ -17,7 +17,7 @@ import slider3 from './modules/slider3.js';
 // style
 import '../stylesheets/style.scss';
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
   slider1();
   slider2();
   slider3();
