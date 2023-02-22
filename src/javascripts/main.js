@@ -18,7 +18,14 @@ import slider3 from './modules/slider3.js';
 import '../stylesheets/style.scss';
 
 window.addEventListener('load', () => {
-  slider1();
+  // slider1();
+  async function callSlider() {
+    const slider = await slider1();
+    slider.fristEvent();
+  }
+
+  callSlider();
+
   slider2();
   slider3();
 });
@@ -75,7 +82,9 @@ async function slider1() {
   // canvasの高さを指定
   $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}px`;
 
-  window.addEventListener('load', () => {
+  // first
+  const fristEvent = () => {
+    console.log('firstEvent');
     camera.left = -$slider.offsetWidth / 2;
     camera.right = $slider.offsetWidth / 2;
     camera.top = $slider.offsetHeight / 2;
@@ -88,8 +97,7 @@ async function slider1() {
 
     renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    console.log('load call');
-  });
+  };
 
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
@@ -253,4 +261,7 @@ async function slider1() {
   // folder1.open();
 
   // folder1.add(material.uniforms.uTexScale, 'value', 0, 2.0, 0.1).name('Scale');
+  return {
+    fristEvent,
+  };
 }
