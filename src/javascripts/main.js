@@ -75,6 +75,21 @@ async function slider1() {
   // canvasの高さを指定
   $inner.querySelector('canvas').style.height = `${SLIDE_MAXHEIGHT}px`;
 
+  window.addEventListener('load', () => {
+    camera.left = -$slider.offsetWidth / 2;
+    camera.right = $slider.offsetWidth / 2;
+    camera.top = $slider.offsetHeight / 2;
+    camera.bottom = -$slider.offsetHeight / 2;
+
+    if ($slider.offsetWidth > SLIDE_WIDTH) {
+      material.uniforms.uTexScale.value = $slider.offsetWidth / SLIDE_WIDTH;
+    }
+    camera.updateProjectionMatrix();
+
+    renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+  });
+
   //ブラウザのリサイズ操作
   window.addEventListener('resize', () => {
     camera.left = -$slider.offsetWidth / 2;
