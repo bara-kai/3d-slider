@@ -88,6 +88,7 @@ async function slider1() {
 
     renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    console.log('load call');
   });
 
   //ブラウザのリサイズ操作
@@ -104,6 +105,7 @@ async function slider1() {
 
     renderer.setSize($slider.offsetWidth, $slider.offsetHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    console.log('resize call');
   });
 
   // テクスチャのロード
